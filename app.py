@@ -19,36 +19,43 @@ v = wind_speed / 3.6
 # -----------------------------
 # DETERMINE ROTATION STAGE
 # -----------------------------
+# -----------------------------
+# TURBINE ANIMATION (NO IMAGES)
+# -----------------------------
+
+frames = ["🌪️", "🌀", "💨", "🔄"]   # rotating symbols
+
 if wind_speed == 0:
     stage = "STOPPED"
     rpm = 0
-    turbine_display = "🛑 Turbine is stopped"
 elif 0 < wind_speed <= 20:
     stage = "VERY SLOW"
     rpm = 5
-    turbine_display = "⚙️ Rotating very slowly"
 elif 20 < wind_speed <= 40:
     stage = "SLOW"
     rpm = 10
-    turbine_display = "🌀 Slow rotation"
 elif 40 < wind_speed <= 80:
     stage = "MEDIUM"
     rpm = 20
-    turbine_display = "🌀🌀 Medium rotation"
 elif 80 < wind_speed <= 150:
     stage = "FAST"
     rpm = 35
-    turbine_display = "🌀🌀🌀 FAST rotation"
-elif wind_speed > 150:
+else:
     stage = "CUT-OFF (Safety Shutdown)"
     rpm = 0
-    turbine_display = "🚫 Wind too high – Turbine shut down for safety"
 
-# Show stage
-st.subheader("Turbine Status")
-st.write(f"**Stage:** {stage}")
-st.write(f"**RPM:** {rpm}")
-st.write(f"**Status:** {turbine_display}")
+st.subheader("Turbine Animation")
+placeholder = st.empty()
+
+if stage == "CUT-OFF (Safety Shutdown)" or rpm == 0:
+    placeholder.write("🛑 Turbine Stopped (Safety Shutdown)")
+else:
+    # Speed of rotation (faster RPM = faster animation)
+    speed = max(0.05, 0.5 - (rpm / 100))
+
+    for i in range(20):
+        placeholder.write(f"### {frames[i % 4]}  \n**Stage:** {stage} — **RPM:** {rpm}")
+        time.sleep(speed)
 
 # -----------------------------
 # INSTANTANEOUS POWER (kW)
