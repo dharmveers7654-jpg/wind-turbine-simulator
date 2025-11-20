@@ -105,6 +105,9 @@ rho = 1.225           # air density
 r = 30                # blade radius (m)
 A = np.pi * r * r     # swept area
 Cp = 0.45             # typical efficiency
+CUT_IN = 10  
+CUT_OFF = 90
+
 
 if stage == "CUT-OFF (Safety Shutdown)":
     power_kw = 0
