@@ -105,4 +105,7 @@ st.image(image_paths[stage], width=350)
 ax.set_title("Cumulative Energy Generated")
 ax.grid(True)
 st.pyplot(fig)
-
+fig, ax = plt.subplots()
+ax.plot(...)
+...
+st.pyplot(fig)
