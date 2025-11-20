@@ -111,7 +111,7 @@ CUT_OFF = 90
 
 if stage == "CUT-OFF (Safety Shutdown)":
     power_kw = 0
-    else:
+else:
     power = 0.5 * rho * A * Cp * (v ** 3)    # watts
     power_kw = round(power / 1000, 2)
 
