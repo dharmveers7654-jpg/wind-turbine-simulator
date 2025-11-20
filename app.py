@@ -120,15 +120,45 @@ st.subheader("Wind Turbine Power Curve")
 wind_speeds = np.linspace(0, 40, 100)
 power_output = []
 
+# -----------------------------
+# REAL POWER CURVE USING ALL SPEEDS UP TO CURRENT VALUE
+# -----------------------------
+st.subheader("Wind Turbine Power Curve (Dynamic)")
+
+rho = 1.225
+r = 40
+A = np.pi * r * r
+Cp = 0.45
+rated_power_kw = 3000  # 3 MW
+cut_in = 3
+rated_speed = 15
+cut_out = 25
+
+# create speeds from 0 → current wind speed (v)
+wind_speeds = np.linspace(0, v, 200)
+power_output = []
+
 for vs in wind_speeds:
-    if vs < 3:
-        power_output.append(0)
-    elif 3 <= vs <= 15:
-        power_output.append((vs - 3) ** 2)
-    elif 15 < vs <= 25:
-        power_output.append(150)
+    if vs < cut_in:
+        P = 0
+    elif cut_in <= vs < rated_speed:
+        P = 0.5 * rho * A * Cp * (vs ** 3)
+        P = min(P / 1000, rated_power_kw)
+    elif rated_speed <= vs < cut_out:
+        P = rated_power_kw
     else:
-        power_output.append(0)
+        P = 0
+    power_output.append(P)
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(wind_speeds, power_output, linewidth=2)
+ax.set_xlabel("Wind Speed (m/s)", fontsize=12)
+ax.set_ylabel("Power Output (kW)", fontsize=12)
+ax.set_title("Wind Turbine Power Curve (Up to Current Wind Speed)", fontsize=14)
+ax.grid(True)
+
+st.pyplot(fig)
+
 
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.plot(wind_speeds, power_output, linewidth=2)
