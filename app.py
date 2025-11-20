@@ -37,8 +37,11 @@ elif 90 < wind_speed <= 120:
 elif 120 < wind_speed <= 150:
     stage = "VERYFAST"
     rpm = 35
+elif wind_speed > 150:
+    stage = "CUT-OFF(Safety shutdown)"
+    rpm = 0
 else:
-    stage = "CUT-OFF (Safety Shutdown)"
+    stage = "invalid input"
     rpm = 0
 
 # -----------------------------
