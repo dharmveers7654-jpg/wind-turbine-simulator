@@ -100,6 +100,8 @@ fig, ax = plt.subplots()
 ax.plot(times, energy_cumulative, marker='o')
 ax.set_xlabel("Time (s)")
 ax.set_ylabel("Energy (kWh)")
+st.image(image_paths[stage], width=350)
+
 ax.set_title("Cumulative Energy Generated")
 ax.grid(True)
 st.pyplot(fig)
