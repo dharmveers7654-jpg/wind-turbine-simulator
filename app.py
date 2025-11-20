@@ -99,7 +99,7 @@ else:
 # Formula: P = 0.5 * ρ * A * Cp * v³
 # -----------------------------
 rho = 1.225           # air density
-r = 40                # blade radius (m)
+r = 30                # blade radius (m)
 A = np.pi * r * r     # swept area
 Cp = 0.45             # typical efficiency
 
@@ -123,37 +123,39 @@ power_output = []
 # -----------------------------
 # REAL POWER CURVE USING ALL SPEEDS UP TO CURRENT VALUE
 # -----------------------------
-st.subheader("Wind Turbine Power Curve (Dynamic)")
+# -----------------------------
+# REAL INSTANT POWER CURVE (0 → 42 m/s) + NEW RADIUS (30m)
+# -----------------------------
+st.subheader("Wind Turbine Instantaneous Power Curve (0–42 m/s)")
 
 rho = 1.225
-r = 40
+r = 30                                 # updated radius
 A = np.pi * r * r
 Cp = 0.45
-rated_power_kw = 3000  # 3 MW
-cut_in = 3
-rated_speed = 15
-cut_out = 25
 
-# create speeds from 0 → current wind speed (v)
-wind_speeds = np.linspace(0, v, 200)
+# fixed realistic wind range
+wind_speeds = np.linspace(0, 42, 300)
 power_output = []
 
 for vs in wind_speeds:
-    if vs < cut_in:
-        P = 0
-    elif cut_in <= vs < rated_speed:
-        P = 0.5 * rho * A * Cp * (vs ** 3)
-        P = min(P / 1000, rated_power_kw)
-    elif rated_speed <= vs < cut_out:
-        P = rated_power_kw
-    else:
-        P = 0
-    power_output.append(P)
+    P = 0.5 * rho * A * Cp * (vs ** 3)   # watts
+    P_kw = P / 1000                      # convert to kW
+    power_output.append(P_kw)
 
+# Plot graph
 fig, ax = plt.subplots(figsize=(7, 4))
 ax.plot(wind_speeds, power_output, linewidth=2)
+
 ax.set_xlabel("Wind Speed (m/s)", fontsize=12)
-ax.set_ylabel("Power Output (kW)", fontsize=12)
+ax.set_ylabel("Instantaneous Power (kW)", fontsize=12)
+ax.set_title("Wind Turbine Power Curve (Using Real Formula, R = 30m)", fontsize=14)
+
+# auto-scale y axis
+ax.set_ylim(0, max(power_output) * 1.1)
+
+ax.grid(True)
+st.pyplot(fig)
+
 ax.set_title("Wind Turbine Power Curve (Up to Current Wind Speed)", fontsize=14)
 ax.grid(True)
 
