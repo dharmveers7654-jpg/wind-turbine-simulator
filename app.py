@@ -153,9 +153,6 @@ ax.set_title("Wind Turbine Power Curve (Using Real Formula, R = 30m)", fontsize=
 # auto-scale y axis
 ax.set_ylim(0, max(power_output) * 1.1)
 
-ax.grid(True)
-st.pyplot(fig)
-
 ax.set_title("Wind Turbine Power Curve (Up to Current Wind Speed)", fontsize=14)
 ax.grid(True)
 
