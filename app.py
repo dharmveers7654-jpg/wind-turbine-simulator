@@ -113,7 +113,7 @@ if stage == "CUT-OFF (Safety Shutdown)":
     power_kw = 0
 else:
     V=V*(1000/3600)
-    if v<(CUT_IN *1000/3600):
+    if V < (CUT_IN *1000/3600):
         power_kw=0
     else:
     power = 0.5 * rho * A * Cp * (v ** 3)    # watts
