@@ -129,7 +129,7 @@ power_output = []
 # -----------------------------
 # REAL INSTANT POWER CURVE (0 → 42 m/s) + NEW RADIUS (30m)
 # -----------------------------
-st.subheader("Wind Turbine Instantaneous Power Curve (0–42 m/s)")
+st.subheader("Wind Turbine Instantaneous Power Curve (0–25 m/s)")
 
 rho = 1.225
 r = 30                                 # updated radius
@@ -137,7 +137,7 @@ A = np.pi * r * r
 Cp = 0.45
 
 # fixed realistic wind range
-wind_speeds = np.linspace(0, 42, 300)
+wind_speeds = np.linspace(0, 25, 300)
 power_output = []
 
 for vs in wind_speeds:
