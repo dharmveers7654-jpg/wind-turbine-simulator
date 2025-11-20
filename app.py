@@ -101,30 +101,33 @@ else:
 # INSTANTANEOUS POWER (kW)
 # Formula: P = 0.5 * ρ * A * Cp * v³
 # -----------------------------
-rho = 1.225           # air density
-r = 30                # blade radius (m)
-A = np.pi * r * r     # swept area
-Cp = 0.45             # typical efficiency
-CUT_IN = 10  
+
+rho = 1.225            # air density
+r = 30                 # blade radius (m)
+A = np.pi * r * r      # swept area
+Cp = 0.45              # typical efficiency
+CUT_IN = 10            # Minimum wind speed for rotation
 CUT_OFF = 90
 
+# Assume 'v' (wind speed) is defined earlier in your code
 
-if stage == "CUT-OFF (Safety Shutdown)":
+power_kw = 0 # Initialize power to zero (best practice)
+
+if v < CUT_IN: # ⬅️ NEW CHECK FOR CUT-IN SPEED
+    # Below 10 km/h: Power is zero
+    power_kw = 0
+elif v >= CUT_OFF:
+    # At or above 90 km/h: Power is zero (or rated power for simplification)
     power_kw = 0
 else:
+    # Between CUT_IN and CUT_OFF: Calculate power
     power = 0.5 * rho * A * Cp * (v ** 3)    # watts
     power_kw = round(power / 1000, 2)
 
 st.subheader("Instantaneous Energy Output")
 st.write(f"**Power Generated:** {power_kw} kW")
 
-# -----------------------------
-# POWER CURVE GRAPH (EXTENDED RANGE)
-# -----------------------------
-st.subheader("Wind Turbine Power Curve")
 
-wind_speeds = np.linspace(0, 40, 100)
-power_output = []
 
 # -----------------------------
 # REAL POWER CURVE USING ALL SPEEDS UP TO CURRENT VALUE
@@ -132,8 +135,6 @@ power_output = []
 # -----------------------------
 # REAL INSTANT POWER CURVE (0 → 42 m/s) + NEW RADIUS (30m)
 # -----------------------------
-st.subheader("Wind Turbine Instantaneous Power Curve (0–25 m/s)")
-
 rho = 1.225
 r = 30                                 # updated radius
 A = np.pi * r * r
