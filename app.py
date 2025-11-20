@@ -93,12 +93,148 @@ times = np.arange(1, duration + 1)
 energy_each_sec = np.full_like(times, power_kw / 3600.0, dtype=float)
 energy_cumulative = np.cumsum(energy_each_sec)
 
-fig, ax = plt.subplots()
-ax.plot(times, energy_cumulative, marker='o')
-ax.set_xlabel("Time (s)")
-ax.set_ylabel("Energy (kWh)")
-ax.set_title("Cumulative Energy Generated")
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+        import matplotlib.pyplot as plt
+import numpy as np
+
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(wind_speeds, power_output)
+ax.set_xlabel("Wind Speed (m/s)")
+ax.set_ylabel("Power Output (kW)")
 ax.grid(True)
 
 st.pyplot(fig)
+import matplotlib.pyplot as plt
+import numpy as np
 
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(wind_speeds, power_output)
+ax.set_xlabel("Wind Speed (m/s)")
+ax.set_ylabel("Power Output (kW)")
+ax.grid(True)
+
+st.pyplot(fig) 
+import matplotlib.pyplot as plt
+import numpy as np
+
+# --- GRAPH CODE FIXED ---
+st.subheader("Wind Power vs Wind Speed")
+
+# Wind speed values
+wind_speeds = np.linspace(0, 25, 50)
+
+# Simple realistic power curve (scaled)
+power_output = []
+for v in wind_speeds:
+    if v < 3:
+        power_output.append(0)
+    elif 3 <= v <= 15:
+        power_output.append((v - 3) ** 2)   # rising curve
+    elif 15 < v <= 25:
+        power_output.append(150)            # rated power
+    else:
+        power_output.append(0)
+
+fig, ax = plt.subplots(figsize=(6, 3))
+ax.plot(wind_speeds, power_output)
+ax.set_xlabel("Wind Speed (m/s)")
+ax.set_ylabel("Power Output (kW)")
+ax.grid(True)
+
+st.pyplot(fig)
