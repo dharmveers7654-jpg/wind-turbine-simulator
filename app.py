@@ -41,22 +41,58 @@ else:
 # -----------------------------
 # TURBINE ANIMATION (NO IMAGES)
 # -----------------------------
-frames = ["🌪️", "🌀", "💨", "🔄"]  # animation frames
+# -----------------------------
+# TURBINE ANIMATION (NO IMAGES)
+# -----------------------------
+# -----------------------------
+# TURBINE ANIMATION (SVG, smooth, non-blocking)
+# -----------------------------
+st.subheader("Turbine Animation (SVG)")
 
-st.subheader("Turbine Animation")
-placeholder = st.empty()
-
+# If turbine is stopped, don't animate
 if stage == "CUT-OFF (Safety Shutdown)" or rpm == 0:
-    placeholder.write("🛑 Turbine Stopped (Safety Shutdown)")
+    st.markdown("<h3 style='text-align:center;'>🛑 Turbine Stopped (Safety Shutdown)</h3>", unsafe_allow_html=True)
 else:
-    # Faster wind = faster animation
-    speed = max(0.05, 0.5 - (rpm / 100))
+    # convert RPM to seconds per full rotation (period)
+    # rpm = rotations per minute -> period_sec = 60 / rpm
+    period_sec = max(0.15, 60.0 / float(rpm))  # clamp to avoid too-fast animation
 
-    for i in range(15):
-        placeholder.write(
-            f"### {frames[i % 4]}\n**Stage:** {stage} — **RPM:** {rpm}"
-        )
-        time.sleep(speed)
+    # SVG with CSS animation-duration set by period_sec
+    svg = f"""
+    <div style="display:flex;justify-content:center;align-items:center;">
+    <style>
+      .rot{{ transform-origin: 100px 100px; animation: spin {period_sec}s linear infinite; }}
+      @keyframes spin {{
+        from {{ transform: rotate(0deg); }}
+        to   {{ transform: rotate(360deg); }}
+      }}
+      .turbine-container {{ width: 320px; height: 320px; }}
+      .hub {{ fill: #666; }}
+      .blade {{ fill: #444; rx: 2; ry: 2; }}
+      .tower {{ fill: #888; }}
+    </style>
+
+    <svg class="turbine-container" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rotating wind turbine">
+      <!-- hub -->
+      <circle cx="100" cy="100" r="6" class="hub"/>
+      <!-- rotating blades group -->
+      <g class="rot">
+        <rect x="98" y="20" width="4" height="70" class="blade" />
+        <rect x="98" y="20" width="4" height="70" class="blade" transform="rotate(120 100 100)"/>
+        <rect x="98" y="20" width="4" height="70" class="blade" transform="rotate(240 100 100)"/>
+      </g>
+      <!-- tower -->
+      <rect x="95" y="100" width="10" height="80" class="tower"/>
+    </svg>
+    </div>
+
+    <div style="text-align:center;margin-top:6px;">
+      <strong>Stage:</strong> {stage} &nbsp; • &nbsp; <strong>RPM:</strong> {rpm}
+    </div>
+    """
+
+    st.markdown(svg, unsafe_allow_html=True)
+
 
 # -----------------------------
 # INSTANTANEOUS POWER (kW)
