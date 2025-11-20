@@ -51,9 +51,8 @@ else:
 st.subheader(f"Turbine Stage: {stage_name}")
 st.metric("Instant Power", f"{power_kw:.2f} kW")
 
-# --- SVG turbine with CSS rotation: rotation speed controlled by CSS animation-duration ---
+# --- SVG turbine animation ---
 if rot_period is None:
-    # show a stopped SVG (no animation)
     svg = f"""
     <svg width="320" height="320" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
       <circle cx="100" cy="100" r="6" fill="#666"/>
@@ -66,7 +65,6 @@ if rot_period is None:
     </svg>
     """
 else:
-    # animated SVG: animation-duration equals rot_period seconds per full rotation
     svg = f"""
     <style>
     .rot{{ transform-origin: 100px 100px; animation: spin {rot_period}s linear infinite; }}
@@ -88,11 +86,10 @@ else:
 
 st.markdown(svg, unsafe_allow_html=True)
 
-# --- Simulate instantaneous energy (kWh) over time and plot ---
+# --- GRAPH SECTION ---
 st.subheader("Instantaneous Energy (kWh) vs Time")
 
 times = np.arange(1, duration + 1)
-# energy produced each second (kWh) = power_kw * (1/3600)
 energy_each_sec = np.full_like(times, power_kw / 3600.0, dtype=float)
 energy_cumulative = np.cumsum(energy_each_sec)
 
@@ -100,12 +97,8 @@ fig, ax = plt.subplots()
 ax.plot(times, energy_cumulative, marker='o')
 ax.set_xlabel("Time (s)")
 ax.set_ylabel("Energy (kWh)")
-st.image(image_paths[stage], width=350)
-
 ax.set_title("Cumulative Energy Generated")
 ax.grid(True)
+
 st.pyplot(fig)
-fig, ax = plt.subplots()
-ax.plot(...)
-...
-st.pyplot(fig)
+
