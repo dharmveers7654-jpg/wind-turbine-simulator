@@ -19,12 +19,6 @@ v = wind_speed / 3.6
 # -----------------------------
 # DETERMINE ROTATION STAGE
 # -----------------------------
-# -----------------------------
-# TURBINE ANIMATION (NO IMAGES)
-# -----------------------------
-
-frames = ["🌪️", "🌀", "💨", "🔄"]   # rotating symbols
-
 if wind_speed == 0:
     stage = "STOPPED"
     rpm = 0
@@ -44,17 +38,24 @@ else:
     stage = "CUT-OFF (Safety Shutdown)"
     rpm = 0
 
+# -----------------------------
+# TURBINE ANIMATION (NO IMAGES)
+# -----------------------------
+frames = ["🌪️", "🌀", "💨", "🔄"]  # animation frames
+
 st.subheader("Turbine Animation")
 placeholder = st.empty()
 
 if stage == "CUT-OFF (Safety Shutdown)" or rpm == 0:
     placeholder.write("🛑 Turbine Stopped (Safety Shutdown)")
 else:
-    # Speed of rotation (faster RPM = faster animation)
+    # Faster wind = faster animation
     speed = max(0.05, 0.5 - (rpm / 100))
 
-    for i in range(20):
-        placeholder.write(f"### {frames[i % 4]}  \n**Stage:** {stage} — **RPM:** {rpm}")
+    for i in range(15):
+        placeholder.write(
+            f"### {frames[i % 4]}\n**Stage:** {stage} — **RPM:** {rpm}"
+        )
         time.sleep(speed)
 
 # -----------------------------
@@ -101,7 +102,3 @@ ax.set_title("Wind Turbine Power Curve", fontsize=14)
 ax.grid(True)
 
 st.pyplot(fig)
-
-# -----------------------------
-# END
-# -----------------------------
