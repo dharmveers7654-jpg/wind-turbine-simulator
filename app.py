@@ -19,8 +19,8 @@ v = wind_speed / 3.6
 # -----------------------------
 # DETERMINE ROTATION STAGE
 # -----------------------------
-if wind_speed < 10:
-    stage = "LOW SPEED,STOPPED"
+if wind_speed <= 10:
+    stage = "LOW WIND "
     rpm = 0
 elif 10 < wind_speed <= 40:
     stage = "VERY SLOW"
