@@ -22,16 +22,16 @@ v = wind_speed / 3.6
 if wind_speed == 0:
     stage = "STOPPED"
     rpm = 0
-elif 0 < wind_speed <= 20:
+elif 0 < wind_speed <= 30:
     stage = "VERY SLOW"
     rpm = 5
-elif 20 < wind_speed <= 40:
+elif 30 < wind_speed <= 50:
     stage = "SLOW"
     rpm = 10
-elif 40 < wind_speed <= 80:
+elif 50 < wind_speed <= 100:
     stage = "MEDIUM"
     rpm = 20
-elif 80 < wind_speed <= 150:
+elif 100 < wind_speed <= 150:
     stage = "FAST"
     rpm = 35
 else:
@@ -155,16 +155,6 @@ ax.plot(wind_speeds, power_output, linewidth=2)
 ax.set_xlabel("Wind Speed (m/s)", fontsize=12)
 ax.set_ylabel("Power Output (kW)", fontsize=12)
 ax.set_title("Wind Turbine Power Curve (Up to Current Wind Speed)", fontsize=14)
-ax.grid(True)
-
-st.pyplot(fig)
-
-
-fig, ax = plt.subplots(figsize=(7, 4))
-ax.plot(wind_speeds, power_output, linewidth=2)
-ax.set_xlabel("Wind Speed (m/s)", fontsize=12)
-ax.set_ylabel("Power Output (kW)", fontsize=12)
-ax.set_title("Wind Turbine Power Curve", fontsize=14)
 ax.grid(True)
 
 st.pyplot(fig)
