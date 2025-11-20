@@ -1,42 +1,75 @@
 import streamlit as st
-import numpy as np
-import math
 import time
+import matplotlib.pyplot as plt
 
-st.title("Wind Turbine Simulation (Real Formula Based)")
+st.set_page_config(page_title="Wind Turbine Simulator", page_icon="💨")
 
-st.write("""
-This simulator calculates real wind turbine power using:
-**P = 0.5 × ρ × A × V³ × Cp**
+st.title("🌬️ Wind Turbine Simulation")
 
-Where:
-- ρ = air density (1.225 kg/m³ standard)
-- A = swept area = π × R²
-- V = wind speed (m/s)
-- Cp = coefficient of performance (0.45 for modern turbines)
-""")
+# --- Input wind speed ---
+wind_speed = st.slider("Wind Speed (km/h)", 0, 200, 20, step=5)
 
-# ------------------- USER INPUTS --------------------
-wind_kmh = st.slider("Wind Speed (km/h)", 5, 60, 20, step=5)
-wind = wind_kmh / 3.6                 # convert to m/s
-radius = 40                           # real turbine blade length
-rho = 1.225                           # standard air density
-Cp = 0.45                             # real efficiency
-Area = math.pi * radius**2
+# --- Determine rotation stage ---
+if wind_speed > 150:
+    stage = 0  # STOP
+elif wind_speed <= 20:
+    stage = 1
+elif wind_speed <= 40:
+    stage = 2
+elif wind_speed <= 70:
+    stage = 3
+else:
+    stage = 4
 
-# ------------------- POWER CALCULATION --------------------
-Power = 0.5 * rho * Area * wind**3 * Cp
+st.subheader("Turbine Rotation Stage:")
+stage_names = ["STOP", "Very Slow", "Slow", "Medium", "Fast"]
+st.write(stage_names[stage])
 
-st.subheader("Calculated Power Output")
-st.success(f"**{Power/1000:.2f} kW**")
+# --- Load turbine images based on stage ---
+image_paths = {
+    0: "images/blade_1.png",
+    1: "images/blade_2.png",
+    2: "images/blade_3.png",
+    3: "images/blade_4.png",
+    4: "images/blade_5.png"
+}
 
-# ------------------- ROTATING BLADE ANIMATION --------------------
-st.subheader("Wind Turbine Rotor Animation")
+st.image(image_paths[stage], width=350)
+
+# --- Instant Power Calculation (Simple Real Formula) ---
+air_density = 1.225
+area = 80        # m2 — small real turbine
+cp = 0.45        # efficiency value
+
+wind_speed_m_s = wind_speed / 3.6
+power_watts = 0.5 * air_density * area * cp * (wind_speed_m_s ** 3)
+
+if stage == 0:
+    power_watts = 0
+
+power_kW = power_watts / 1000
+st.subheader("Instantaneous Power Output:")
+st.write(f"⚡ {power_kW:.2f} kW")
+
+# --- REAL-TIME ENERGY GRAPH ---
+st.subheader("Energy Generation Over Time")
+
+duration = st.slider("Simulation Duration (seconds)", 1, 30, 10)
+energy_values = []
+time_axis = []
 
 placeholder = st.empty()
 
-for angle in range(0, 360, 10):
-    fig = st.pyplot()
-    placeholder.write(f"Rotor Angle: {angle}°")
-    time.sleep(0.1)
+for t in range(duration):
+    energy_values.append(power_kW)
+    time_axis.append(t)
+
+    fig, ax = plt.subplots()
+    ax.plot(time_axis, energy_values)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Energy (kW)")
+    ax.set_title("Instant Energy vs Time")
+    placeholder.pyplot(fig)
+
+    time.sleep(0.4)
 
