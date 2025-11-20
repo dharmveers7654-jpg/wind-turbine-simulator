@@ -1,75 +1,106 @@
 import streamlit as st
+import math
 import time
+import numpy as np
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Wind Turbine Simulator", page_icon="💨")
+st.set_page_config(page_title="Wind Turbine Simulator", layout="wide")
 
-st.title("🌬️ Wind Turbine Simulation")
+st.title("🌬️ Wind Turbine Simulation (SVG Rotating Blades)")
 
-# --- Input wind speed ---
-wind_speed = st.slider("Wind Speed (km/h)", 0, 200, 20, step=5)
+# --- Constants ---
+RADIUS = 40                  # meters, turbine rotor radius (used for power)
+AIR_DENSITY = 1.225          # kg/m^3
+CP = 0.45                    # power coefficient (efficiency)
+CUT_OFF_KMH = 150            # stop above this
 
-# --- Determine rotation stage ---
-if wind_speed > 150:
-    stage = 0  # STOP
-elif wind_speed <= 20:
-    stage = 1
-elif wind_speed <= 40:
-    stage = 2
-elif wind_speed <= 70:
-    stage = 3
+# --- Inputs ---
+wind_kmh = st.slider("Wind Speed (km/h) — use multiples of 5", 0, 200, 20, step=5)
+duration = st.number_input("Simulation duration (seconds for graph)", min_value=5, max_value=120, value=15, step=5)
+
+# --- Convert & compute power ---
+wind_mps = wind_kmh / 3.6
+area = math.pi * (RADIUS**2)
+if wind_kmh >= CUT_OFF_KMH or wind_kmh < 10:
+    power_kw = 0.0
 else:
-    stage = 4
+    power_w = 0.5 * AIR_DENSITY * area * (wind_mps**3) * CP
+    power_kw = power_w / 1000.0
 
-st.subheader("Turbine Rotation Stage:")
-stage_names = ["STOP", "Very Slow", "Slow", "Medium", "Fast"]
-st.write(stage_names[stage])
+# --- Determine stage & animation speed (seconds per full rotation) ---
+if wind_kmh >= CUT_OFF_KMH:
+    stage_name = "Cut-off (Stopped)"
+    rot_period = None
+elif wind_kmh == 0:
+    stage_name = "Stopped"
+    rot_period = None
+elif wind_kmh <= 10:
+    stage_name = "Very Slow"
+    rot_period = 6.0
+elif wind_kmh <= 30:
+    stage_name = "Slow"
+    rot_period = 3.5
+elif wind_kmh <= 60:
+    stage_name = "Medium"
+    rot_period = 1.5
+else:
+    stage_name = "Fast"
+    rot_period = 0.8
 
-# --- Load turbine images based on stage ---
-image_paths = {
-    0: "images/blade_1.png",
-    1: "images/blade_2.png",
-    2: "images/blade_3.png",
-    3: "images/blade_4.png",
-    4: "images/blade_5.png"
-}
+# --- Display status ---
+st.subheader(f"Turbine Stage: {stage_name}")
+st.metric("Instant Power", f"{power_kw:.2f} kW")
 
-st.image(image_paths[stage], width=350)
+# --- SVG turbine with CSS rotation: rotation speed controlled by CSS animation-duration ---
+if rot_period is None:
+    # show a stopped SVG (no animation)
+    svg = f"""
+    <svg width="320" height="320" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="6" fill="#666"/>
+      <g transform="rotate(0 100 100)">
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444"/>
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444" transform="rotate(120 100 100)"/>
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444" transform="rotate(240 100 100)"/>
+      </g>
+      <rect x="95" y="100" width="10" height="70" fill="#888"/>
+    </svg>
+    """
+else:
+    # animated SVG: animation-duration equals rot_period seconds per full rotation
+    svg = f"""
+    <style>
+    .rot{{ transform-origin: 100px 100px; animation: spin {rot_period}s linear infinite; }}
+    @keyframes spin {{
+      from {{ transform: rotate(0deg); }}
+      to   {{ transform: rotate(360deg); }}
+    }}
+    </style>
+    <svg width="320" height="320" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="6" fill="#666"/>
+      <g class="rot">
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444"/>
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444" transform="rotate(120 100 100)"/>
+        <rect x="98" y="20" width="4" height="70" rx="2" ry="2" fill="#444" transform="rotate(240 100 100)"/>
+      </g>
+      <rect x="95" y="100" width="10" height="70" fill="#888"/>
+    </svg>
+    """
 
-# --- Instant Power Calculation (Simple Real Formula) ---
-air_density = 1.225
-area = 80        # m2 — small real turbine
-cp = 0.45        # efficiency value
+st.markdown(svg, unsafe_allow_html=True)
 
-wind_speed_m_s = wind_speed / 3.6
-power_watts = 0.5 * air_density * area * cp * (wind_speed_m_s ** 3)
+# --- Simulate instantaneous energy (kWh) over time and plot ---
+st.subheader("Instantaneous Energy (kWh) vs Time")
 
-if stage == 0:
-    power_watts = 0
+times = np.arange(1, duration + 1)
+# energy produced each second (kWh) = power_kw * (1/3600)
+energy_each_sec = np.full_like(times, power_kw / 3600.0, dtype=float)
+energy_cumulative = np.cumsum(energy_each_sec)
 
-power_kW = power_watts / 1000
-st.subheader("Instantaneous Power Output:")
-st.write(f"⚡ {power_kW:.2f} kW")
-
-# --- REAL-TIME ENERGY GRAPH ---
-st.subheader("Energy Generation Over Time")
-
-duration = st.slider("Simulation Duration (seconds)", 1, 30, 10)
-energy_values = []
-time_axis = []
-
-placeholder = st.empty()
-
-for t in range(duration):
-    energy_values.append(power_kW)
-    time_axis.append(t)
-
-    fig, ax = plt.subplots()
-    ax.plot(time_axis, energy_values)
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Energy (kW)")
-    ax.set_title("Instant Energy vs Time")
-    placeholder.pyplot(fig)
-
-    time.sleep(0.4)
+fig, ax = plt.subplots()
+ax.plot(times, energy_cumulative, marker='o')
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Energy (kWh)")
+ax.set_title("Cumulative Energy Generated")
+ax.grid(True)
+st.pyplot(fig)
 
