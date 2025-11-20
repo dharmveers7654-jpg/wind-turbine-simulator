@@ -1,63 +1,73 @@
-import streamlit as st
+
+
+
+           import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 st.set_page_config(page_title="Wind Turbine Simulator", layout="centered")
 
 st.title("🌬️ Wind Turbine Simulator")
 st.write("Realistic simulation based on standard wind turbine values.")
 
-# -----------------------------
-# INPUT: WIND SPEED
-# -----------------------------
-wind_speed = st.slider("Wind Speed (km/h)", 0, 200, 10, step=5)
+# --- Define Physics and Speed Constants ---
+rho = 1.225            # air density (kg/m³)
+r = 30                 # blade radius (m)
+A = np.pi * r * r      # swept area (m²)
+Cp = 0.45              # typical efficiency
 
-# Convert to m/s
-v = wind_speed / 3.6
+# Define limits in KM/H (for the user/slider input and RPM logic)
+CUT_IN_KMH = 15        # Minimum wind speed for rotation (15 km/h)
+CUT_OFF_KMH = 90       # Maximum wind speed for operation (90 km/h)
+
+# Convert limits to M/S (REQUIRED for the power formula: P = 0.5 * rho * A * Cp * v³)
+CUT_IN_MS = CUT_IN_KMH / 3.6    # ~4.17 m/s
+CUT_OFF_MS = CUT_OFF_KMH / 3.6  # ~25.0 m/s
+# ------------------------------------------
+
+# -----------------------------
+# INPUT & CONVERSION
+# -----------------------------
+wind_speed_kmh = st.slider("Wind Speed (km/h)", 0, 100, 15, step=5)
+
+# Convert to m/s (REQUIRED for the power formula)
+v_ms = wind_speed_kmh / 3.6
 
 # -----------------------------
 # DETERMINE ROTATION STAGE
 # -----------------------------
-if wind_speed <= 10:
-    stage = "LOW WIND "
+if wind_speed_kmh < CUT_IN_KMH: # If less than 15 km/h
+    stage = "LOW WIND (No Rotation)"
     rpm = 0
-elif 15 < wind_speed <= 20:
+elif wind_speed_kmh >= CUT_OFF_KMH: # If 90 km/h or more
+    stage = "CUT-OFF (Safety Shutdown)"
+    rpm = 0
+elif CUT_IN_KMH <= wind_speed_kmh <= 20:
     stage = "VERY SLOW"
     rpm = 5
-elif 20 < wind_speed <= 30:
+elif 20 < wind_speed_kmh <= 30:
     stage = "SLOW"
     rpm = 10
-elif 30 < wind_speed <= 45:
+elif 30 < wind_speed_kmh <= 45:
     stage = "MEDIUM"
     rpm = 20
-elif 45 < wind_speed <= 60:
+elif 45 < wind_speed_kmh <= 60:
     stage = "FAST"
     rpm = 25
-elif 60 < wind_speed <= 90:
+elif 60 < wind_speed_kmh < CUT_OFF_KMH: # Up to 90 km/h
     stage = "VERYFAST"
     rpm = 35
-else: 
-    stage = "CUT-OFF(Safety shutdown)"
-    rpm = 0
 
-# -----------------------------
-# TURBINE ANIMATION (NO IMAGES)
-# -----------------------------
-# -----------------------------
-# TURBINE ANIMATION (NO IMAGES)
-# -----------------------------
 # -----------------------------
 # TURBINE ANIMATION (SVG, smooth, non-blocking)
 # -----------------------------
 st.subheader("Turbine Animation (SVG)")
 
 # If turbine is stopped, don't animate
-if stage == "CUT-OFF (Safety Shutdown)" or rpm == 0:
-    st.markdown("<h3 style='text-align:center;'>🛑 Turbine Stopped (Safety Shutdown)</h3>", unsafe_allow_html=True)
+if rpm == 0:
+    st.markdown("<h3 style='text-align:center;'>🛑 Turbine Stopped</h3>", unsafe_allow_html=True)
 else:
     # convert RPM to seconds per full rotation (period)
-    # rpm = rotations per minute -> period_sec = 60 / rpm
     period_sec = max(0.15, 60.0 / float(rpm))  # clamp to avoid too-fast animation
 
     # SVG with CSS animation-duration set by period_sec
@@ -76,15 +86,12 @@ else:
     </style>
 
     <svg class="turbine-container" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Rotating wind turbine">
-      <!-- hub -->
       <circle cx="100" cy="100" r="6" class="hub"/>
-      <!-- rotating blades group -->
       <g class="rot">
         <rect x="98" y="20" width="4" height="70" class="blade" />
         <rect x="98" y="20" width="4" height="70" class="blade" transform="rotate(120 100 100)"/>
         <rect x="98" y="20" width="4" height="70" class="blade" transform="rotate(240 100 100)"/>
       </g>
-      <!-- tower -->
       <rect x="95" y="100" width="10" height="80" class="tower"/>
     </svg>
     </div>
@@ -96,71 +103,60 @@ else:
 
     st.markdown(svg, unsafe_allow_html=True)
 
-
 # -----------------------------
-# INSTANTANEOUS POWER (kW)
-# Formula: P = 0.5 * ρ * A * Cp * v³
+# INSTANTANEOUS POWER (kW) - CORRECTED
 # -----------------------------
+power_kw = 0 # Initialize power to zero
 
-rho = 1.225            # air density
-r = 30                 # blade radius (m)
-A = np.pi * r * r      # swept area
-Cp = 0.45              # typical efficiency
-CUT_IN = 10            # Minimum wind speed for rotation
-CUT_OFF = 90
-
-# Assume 'v' (wind speed) is defined earlier in your code
-
-power_kw = 0 # Initialize power to zero (best practice)
-
-if v < CUT_IN: # ⬅️ NEW CHECK FOR CUT-IN SPEED
-    # Below 10 km/h: Power is zero
+# Logic uses the M/S variables for the check against the M/S wind speed (v_ms)
+if v_ms < CUT_IN_MS:
     power_kw = 0
-elif v >= CUT_OFF:
-    # At or above 90 km/h: Power is zero (or rated power for simplification)
+elif v_ms >= CUT_OFF_MS:
     power_kw = 0
 else:
-    # Between CUT_IN and CUT_OFF: Calculate power
-    power = 0.5 * rho * A * Cp * (v ** 3)    # watts
+    # Calculation performed using v_ms (correct units for the power formula)
+    power = 0.5 * rho * A * Cp * (v_ms ** 3)    # watts
     power_kw = round(power / 1000, 2)
 
 st.subheader("Instantaneous Energy Output")
-st.write(f"**Power Generated:** {power_kw} kW")
-
-
+st.write(f"**Power Generated:** **{power_kw} kW**")
 
 # -----------------------------
-# REAL POWER CURVE USING ALL SPEEDS UP TO CURRENT VALUE
+# REAL POWER CURVE GRAPH - CORRECTED
 # -----------------------------
-# -----------------------------
-# REAL INSTANT POWER CURVE (0 → 42 m/s) + NEW RADIUS (30m)
-# -----------------------------
-rho = 1.225
-r = 30                                 # updated radius
-A = np.pi * r * r
-Cp = 0.45
+st.subheader("Wind Turbine Power Curve")
 
-# fixed realistic wind range
-wind_speeds = np.linspace(0, 25, 300)
+# Generate wind speeds in m/s for the graph x-axis
+wind_speeds_ms = np.linspace(0, 30, 300) # Range up to 30 m/s (~108 km/h)
 power_output = []
 
-for vs in wind_speeds:
-    P = 0.5 * rho * A * Cp * (vs ** 3)   # watts
-    P_kw = P / 1000                      # convert to kW
+for v_plot in wind_speeds_ms:
+    # Implemented Cut-In/Cut-Off logic inside the loop
+    if v_plot < CUT_IN_MS or v_plot >= CUT_OFF_MS:
+        P_kw = 0 # Power is zero outside the operating range
+    else:
+        # Calculate power
+        P = 0.5 * rho * A * Cp * (v_plot ** 3) # watts
+        P_kw = P / 1000                        # convert to kW
+    
     power_output.append(P_kw)
-
+    
 # Plot graph
 fig, ax = plt.subplots(figsize=(7, 4))
-ax.plot(wind_speeds, power_output, linewidth=2)
+ax.plot(wind_speeds_ms, power_output, linewidth=2, label='Theoretical Power Curve')
+
+# Plot the current operating point
+current_power_kw = power_kw
+ax.plot(v_ms, current_power_kw, 'o', color='red', label='Current Speed')
+ax.vlines(v_ms, 0, current_power_kw, colors='r', linestyles='--', linewidth=1)
+ax.legend()
+
 
 ax.set_xlabel("Wind Speed (m/s)", fontsize=12)
-ax.set_ylabel("Instantaneous Power (kW)", fontsize=12)
-ax.set_title("Wind Turbine Power Curve (Using Real Formula, R = 30m)", fontsize=14)
+ax.set_ylabel("Power Output (kW)", fontsize=12)
+ax.set_title("Wind Turbine Power Curve (R = 30m, $\text{C}_p = 0.45$)", fontsize=14)
 
-# auto-scale y axis
 ax.set_ylim(0, max(power_output) * 1.1)
-
-ax.set_title("Wind Turbine Power Curve (Up to Current Wind Speed)", fontsize=14)
 ax.grid(True)
 
-st.pyplot(fig)
+st.pyplot(fig)  
