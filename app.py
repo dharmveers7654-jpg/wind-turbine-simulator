@@ -37,7 +37,7 @@ elif 90 < wind_speed <= 120:
 elif 120 < wind_speed <= 150:
     stage = "VERYFAST"
     rpm = 35
-else wind_speed > 150:
+else 
     stage = "CUT-OFF(Safety shutdown)"
     rpm = 0
 
